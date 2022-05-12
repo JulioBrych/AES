@@ -58,11 +58,13 @@ roundConstant = [0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80,0x1B,0x36]
 
 listaIndice  = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']
 
+matrixMultiplicacao = []
+
 chave = [0x41,0x42,0x43,0x44,
          0x45,0x46,0x47,0x48,
          0x49,0x4a,0x4b,0x4c,
          0x4d,0x4e,0x4f,0x50]
-roundKeys = []
+roundKeys = [2,1,1,3,3,2,1,1,1,3,2,1,1,1,3,2]
 
 def expancaoDeChave():
         global chave
@@ -77,17 +79,9 @@ def expancaoDeChave():
                 for i in range(12,16):
                         copiaw.append(roundKeys[j][i])
                 #2 - Rot Word
-                copiaw =np.roll(copiaw,-1)
+                copiaw = np.roll(copiaw,-1)
                 #3 - SubWord
-                for i in range(0,4): 
-                        texHex = str(hex(copiaw[i])[2:])
-                        esq,dir  = texHex[:1],texHex[1:]
-                        if(dir == ""):
-                                dir = esq;
-                                esq = "0";
-                        linha = listaIndice.index(esq)
-                        coluna = listaIndice.index(dir)
-                        copiaw[i] = sBox[linha][coluna]
+                copiaw = subBytes(copiaw)
                 #4 - RoundConstant
                 roundC = [roundConstant[j],0x0,0x0,0x0]
                 #5 – XOR com a RoundConstant
@@ -111,7 +105,22 @@ def expancaoDeChave():
                 imprimeHexa(roundKeys[j])
                 print("-------------------------------")
 
+def criptografaBloco(bloco):
+        #SubBytes
+        ...
                 
+def subBytes(lista):
+        for i in range(0,len(lista)): 
+                texHex = str(hex(lista[i])[2:])
+                esq,dir  = texHex[:1],texHex[1:]
+                if(dir == ""):
+                        dir = esq;
+                        esq = "0";
+                linha = listaIndice.index(esq)
+                coluna = listaIndice.index(dir)
+                lista[i] = sBox[linha][coluna]
+        return lista
+
 def imprimeHexa(lista):
         for i in lista:
                 print(hex(i))
