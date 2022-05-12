@@ -1,4 +1,7 @@
+from copy import copy
 import numpy as np
+from regex import R
+from sqlalchemy import null
 
 sBox = [[0x63,0x7c,0x77,0x7b,0xf2,0x6b,0x6f,0xc5,0x30,0x01,0x67,0x2b,0xfe,0xd7,0xab,0x76],
         [0xca,0x82,0xc9,0x7d,0xfa,0x59,0x47,0xf0,0xad,0xd4,0xa2,0xaf,0x9c,0xa4,0x72,0xc0],
@@ -51,6 +54,8 @@ tabelaE = [[0x01,0x03,0x05,0x0f,0x11,0x33,0x55,0xff,0x1a,0x2a,0x72,0x96,0xa1,0xf
            [0x12,0x36,0x5a,0xee,0x29,0x7b,0x8d,0x8c,0x8f,0x8a,0x85,0x94,0xa7,0xf2,0x0d,0x17],
            [0x39,0x4b,0xdd,0x7c,0x84,0x97,0xa2,0xfd,0x1c,0x24,0x6c,0xb4,0xc7,0x52,0xf6,0x01]]
 
+roundConstant = [0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80,0x1B,0x36]
+
 listaIndice  = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']
 
 chave = [0x41,0x42,0x43,0x44,
@@ -63,18 +68,49 @@ def expancaoDeChave():
         global chave
         global roundKeys
         roundKeys.append(chave)
-        for j in range(0,1):
+        print (roundKeys)
+        for j in range(0,10):
+                print(j)
+                #Cria a primeira palavra
                 copiaw = []
+                #1 - copia a ultima palavra da roundKey
                 for i in range(12,16):
                         copiaw.append(roundKeys[j][i])
-                copiaw = np.roll(copiaw,-1)
+                #2 - Rot Word
+                copiaw =np.roll(copiaw,-1)
+                #3 - SubWord
                 for i in range(0,4): 
                         texHex = str(hex(copiaw[i])[2:])
                         esq,dir  = texHex[:1],texHex[1:]
+                        if(dir == ""):
+                                dir = esq;
+                                esq = "0";
                         linha = listaIndice.index(esq)
                         coluna = listaIndice.index(dir)
                         copiaw[i] = sBox[linha][coluna]
-                imprimeHexa(copiaw)
+                #4 - RoundConstant
+                roundC = [roundConstant[j],0x0,0x0,0x0]
+                #5 – XOR com a RoundConstant
+                copiaw[0] = copiaw[0]^roundC[0]
+                #6 – Obtenção da primeira palavra
+                for i in range(0,4): 
+                        copiaw[i] = roundKeys[j][i]^copiaw[i]
+                roundKeys.append(list(copiaw))
+                
+                #Cria a palavra 2
+                for i in range(0,4):
+                        roundKeys[j+1].append(roundKeys[j+1][i]^roundKeys[j][i+4])
+                #Cria a palavra 3
+                for i in range(4,8):
+                        roundKeys[j+1].append(roundKeys[j+1][i]^roundKeys[j][i+4])
+                #Cria a palavra 4
+                for i in range(8,12):
+                        roundKeys[j+1].append(roundKeys[j+1][i]^roundKeys[j][i+4])
+        for j in range(0,11):
+                print(j)
+                imprimeHexa(roundKeys[j])
+                print("-------------------------------")
+
                 
 def imprimeHexa(lista):
         for i in lista:
