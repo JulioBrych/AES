@@ -1,6 +1,7 @@
+from ast import Bytes
 from copy import copy
+from pickletools import bytes1
 import numpy as np
-from regex import R
 from sqlalchemy import null
 
 sBox = [[0x63,0x7c,0x77,0x7b,0xf2,0x6b,0x6f,0xc5,0x30,0x01,0x67,0x2b,0xfe,0xd7,0xab,0x76],
@@ -53,18 +54,16 @@ tabelaE = [[0x01,0x03,0x05,0x0f,0x11,0x33,0x55,0xff,0x1a,0x2a,0x72,0x96,0xa1,0xf
            [0x45,0xcf,0x4a,0xde,0x79,0x8b,0x86,0x91,0xa8,0xe3,0x3e,0x42,0xc6,0x51,0xf3,0x0e],
            [0x12,0x36,0x5a,0xee,0x29,0x7b,0x8d,0x8c,0x8f,0x8a,0x85,0x94,0xa7,0xf2,0x0d,0x17],
            [0x39,0x4b,0xdd,0x7c,0x84,0x97,0xa2,0xfd,0x1c,0x24,0x6c,0xb4,0xc7,0x52,0xf6,0x01]]
-
 roundConstant = [0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80,0x1B,0x36]
 
 listaIndice  = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']
-
-matrixMultiplicacao = []
 
 chave = [0x41,0x42,0x43,0x44,
          0x45,0x46,0x47,0x48,
          0x49,0x4a,0x4b,0x4c,
          0x4d,0x4e,0x4f,0x50]
-roundKeys = [2,1,1,3,3,2,1,1,1,3,2,1,1,1,3,2]
+
+roundKeys = []
 
 def expancaoDeChave():
         global chave
@@ -107,6 +106,9 @@ def expancaoDeChave():
 
 def criptografaBloco(bloco):
         #SubBytes
+        #ShiftRows
+        #MixColumns
+        #AddRoundKey
         ...
                 
 def subBytes(lista):
@@ -114,18 +116,111 @@ def subBytes(lista):
                 texHex = str(hex(lista[i])[2:])
                 esq,dir  = texHex[:1],texHex[1:]
                 if(dir == ""):
-                        dir = esq;
-                        esq = "0";
+                        dir = esq
+                        esq = "0"
                 linha = listaIndice.index(esq)
                 coluna = listaIndice.index(dir)
                 lista[i] = sBox[linha][coluna]
         return lista
 
+def addRoundKey(lista1,lista2):
+        saida = []
+        if(len(lista1) == len(lista2)):
+                for i in range(0,len(lista1)):
+                        saida.append(lista1[i]^lista2[i])
+        return saida
+
+def ShiftRows(lista):
+        saida = []
+        if(len(lista) == 16):
+                saida.append(lista[0])
+                saida.append(lista[5])
+                saida.append(lista[10])
+                saida.append(lista[15])
+                saida.append(lista[4])
+                saida.append(lista[9])
+                saida.append(lista[14])
+                saida.append(lista[3])
+                saida.append(lista[8])
+                saida.append(lista[13])
+                saida.append(lista[2])
+                saida.append(lista[7])
+                saida.append(lista[12])
+                saida.append(lista[1])
+                saida.append(lista[6])
+                saida.append(lista[11])
+        return saida
+
+def MixColumns(lista):
+        saida = []
+        for i in range(0,13,4):
+                saida.append((multiplicacaoGalois(lista[i],2))^(multiplicacaoGalois(lista[i+1],3))^(multiplicacaoGalois(lista[i+2],1))^(multiplicacaoGalois(lista[i+3],1)))
+                saida.append((multiplicacaoGalois(lista[i],1))^(multiplicacaoGalois(lista[i+1],2))^(multiplicacaoGalois(lista[i+2],3))^(multiplicacaoGalois(lista[i+3],1)))
+                saida.append((multiplicacaoGalois(lista[i],1))^(multiplicacaoGalois(lista[i+1],1))^(multiplicacaoGalois(lista[i+2],2))^(multiplicacaoGalois(lista[i+3],3)))
+                saida.append((multiplicacaoGalois(lista[i],3))^(multiplicacaoGalois(lista[i+1],1))^(multiplicacaoGalois(lista[i+2],1))^(multiplicacaoGalois(lista[i+3],2)))
+        return saida
+
 def imprimeHexa(lista):
         for i in lista:
                 print(hex(i))
 
-expancaoDeChave()
+def multiplicacaoGalois(x,y):
+        if(x == 0):
+                return 0
+        elif(y == 1):
+                return x
+        else:
+                x = getTabelaL(x)
+                y = getTabelaL(y)
+                soma = x+y
+                if (soma > 255):
+                        soma -= 255
+                soma = getTabelaE(soma)
+                return soma
         
+def getTabelaL(valor):
+        if(valor <= 255):
+                texHex = str(hex(valor)[2:])
+                esq,dir  = texHex[:1],texHex[1:]
+                if(dir == ""):
+                        dir = esq
+                        esq = "0"
+                linha = listaIndice.index(esq)
+                coluna = listaIndice.index(dir)
+                return tabelaL[linha][coluna]
+        else:
+                return null
+
+
+def getTabelaE(valor):
+        if(valor <= 255):
+                texHex = str(hex(valor)[2:])
+                esq,dir  = texHex[:1],texHex[1:]
+                if(dir == ""):
+                        dir = esq
+                        esq = "0"
+                linha = listaIndice.index(esq)
+                coluna = listaIndice.index(dir)
+                return tabelaE[linha][coluna]
+        else:
+                return null
+
+
+textoteste = [0x44,0x45,0x53,0x45,0x4e,0x56,0x4f,0x4c,0x56,0x49,0x4d,0x45,0x4e,0x54,0x4f,0x21]
+expancaoDeChave()
+print("----------começo---------------")
+p1 = addRoundKey(textoteste,roundKeys[0])
+imprimeHexa(p1)
+print("--------------------------")
+p1 = subBytes(p1)
+imprimeHexa(p1)
+print("-------------------------")
+p1 = ShiftRows(p1)
+imprimeHexa(p1)
+print("--------------------------")
+p1 = MixColumns(p1)
+imprimeHexa(p1)
+#shtr = [0x6b,0xca,0x6f,0xa3,0x2b,0x7b,0x63,0x7c,0xc0,0xa2,0xca,0xf2,0x7b,0xc5,0x30,0x01]
+
         
 

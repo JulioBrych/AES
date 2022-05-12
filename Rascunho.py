@@ -18,3 +18,7 @@ print(res)
 a = 5
 b = 3
 print(a^b)
+
+some_bytes = b"\xab"
+hexadecimal_string = some_bytes.hex()
+print(hexadecimal_string)
