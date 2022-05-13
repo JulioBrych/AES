@@ -1,6 +1,7 @@
 from ast import Bytes
 from copy import copy
 from pickletools import bytes1
+from re import sub
 import numpy as np
 from sqlalchemy import null
 
@@ -58,12 +59,12 @@ roundConstant = [0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80,0x1B,0x36]
 
 listaIndice  = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']
 
+roundKeys = []
+
 chave = [0x41,0x42,0x43,0x44,
          0x45,0x46,0x47,0x48,
          0x49,0x4a,0x4b,0x4c,
          0x4d,0x4e,0x4f,0x50]
-
-roundKeys = []
 
 def expancaoDeChave():
         global chave
@@ -99,31 +100,48 @@ def expancaoDeChave():
                 #Cria a palavra 4
                 for i in range(8,12):
                         roundKeys[j+1].append(roundKeys[j+1][i]^roundKeys[j][i+4])
-        for j in range(0,11):
-                print(j)
-                imprimeHexa(roundKeys[j])
-                print("-------------------------------")
 
 def criptografaBloco(bloco):
-        #SubBytes
-        #ShiftRows
-        #MixColumns
-        #AddRoundKey
-        ...
+        #recebe uma lista de 16 ints e faz o processo de cifragem
+        global roundKeys
+        bloco = addRoundKey(bloco,roundKeys[0])
+        for i in range(1,10):
+                #SubBytes
+                bloco = subBytes(bloco)
+                #ShiftRows
+                bloco = ShiftRows(bloco)
+                #MixColumns
+                bloco = MixColumns(bloco)
+                #AddRoundKey
+                bloco = addRoundKey(bloco,roundKeys[i])
+        bloco = subBytes(bloco)
+        bloco = ShiftRows(bloco)
+        bloco = addRoundKey(bloco,roundKeys[10])
+        return bloco
                 
 def subBytes(lista):
+        #recebe uma lista de ints(0 a 255)
+        #para cada int pega sua representação em hexa para substituir pelo valor da tabela SBox
+        global sBox
         for i in range(0,len(lista)): 
+                #pega o representação do valor em hexa (0X--) e remove o 0X
                 texHex = str(hex(lista[i])[2:])
+                #separa os dois caracteres do texhex
                 esq,dir  = texHex[:1],texHex[1:]
+                #caso o texhex tenha so um caracter o dir ficaria vazio logo é preciso colocar o valor de esq no dir e o dir recebe 0
                 if(dir == ""):
                         dir = esq
                         esq = "0"
+                #pega o indice para a linha usando a esq
                 linha = listaIndice.index(esq)
+                #pega o indice para a coluna usando a dir 
                 coluna = listaIndice.index(dir)
+                #substitui o valor na lsita pelo valor encontrado no SBox
                 lista[i] = sBox[linha][coluna]
         return lista
 
 def addRoundKey(lista1,lista2):
+        #recebe duas lista e faz XOR entre as duas lista
         saida = []
         if(len(lista1) == len(lista2)):
                 for i in range(0,len(lista1)):
@@ -131,6 +149,9 @@ def addRoundKey(lista1,lista2):
         return saida
 
 def ShiftRows(lista):
+        #move os dados da segunda linha um para a direita
+        #move os dados da terceira linha dois para a direita
+        #move os dados da quarta linha tres para a direita
         saida = []
         if(len(lista) == 16):
                 saida.append(lista[0])
@@ -152,6 +173,7 @@ def ShiftRows(lista):
         return saida
 
 def MixColumns(lista):
+        #faz o XOR entre as multiplicaçoes de Galois com os dados vindo da matriz de multiplicação
         saida = []
         for i in range(0,13,4):
                 saida.append((multiplicacaoGalois(lista[i],2))^(multiplicacaoGalois(lista[i+1],3))^(multiplicacaoGalois(lista[i+2],1))^(multiplicacaoGalois(lista[i+3],1)))
@@ -161,14 +183,19 @@ def MixColumns(lista):
         return saida
 
 def imprimeHexa(lista):
+        #imprime os valores de uma lista em hexadecimal
         for i in lista:
                 print(hex(i))
 
 def multiplicacaoGalois(x,y):
+        #recebe dois valores mas o y so pode assumir 3 valores (1;2;3)
+        #caso o x seja 0 retorna 0
         if(x == 0):
                 return 0
+        #caso o y seja 1 retorna o x
         elif(y == 1):
                 return x
+        #caso o x não seja 0 e o y não e 1
         else:
                 x = getTabelaL(x)
                 y = getTabelaL(y)
@@ -179,6 +206,9 @@ def multiplicacaoGalois(x,y):
                 return soma
         
 def getTabelaL(valor):
+        #dado um valor, pega sua representação em hexa para pegar um valor na matriz tabelaL
+        #o primeiro char representa a linha e o segundo a coluna
+        global tabelaL
         if(valor <= 255):
                 texHex = str(hex(valor)[2:])
                 esq,dir  = texHex[:1],texHex[1:]
@@ -193,6 +223,9 @@ def getTabelaL(valor):
 
 
 def getTabelaE(valor):
+        #dado um valor, pega sua representação em hexa para pegar um valor na matriz tabelaE
+        #o primeiro char representa a linha e o segundo a coluna
+        global tabelaE
         if(valor <= 255):
                 texHex = str(hex(valor)[2:])
                 esq,dir  = texHex[:1],texHex[1:]
@@ -208,17 +241,8 @@ def getTabelaE(valor):
 
 textoteste = [0x44,0x45,0x53,0x45,0x4e,0x56,0x4f,0x4c,0x56,0x49,0x4d,0x45,0x4e,0x54,0x4f,0x21]
 expancaoDeChave()
-print("----------começo---------------")
-p1 = addRoundKey(textoteste,roundKeys[0])
-imprimeHexa(p1)
-print("--------------------------")
-p1 = subBytes(p1)
-imprimeHexa(p1)
-print("-------------------------")
-p1 = ShiftRows(p1)
-imprimeHexa(p1)
-print("--------------------------")
-p1 = MixColumns(p1)
+p1 = criptografaBloco(textoteste)
+print("----final----")
 imprimeHexa(p1)
 #shtr = [0x6b,0xca,0x6f,0xa3,0x2b,0x7b,0x63,0x7c,0xc0,0xa2,0xca,0xf2,0x7b,0xc5,0x30,0x01]
 
