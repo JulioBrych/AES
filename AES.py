@@ -1,7 +1,3 @@
-from ast import Bytes
-from copy import copy
-from pickletools import bytes1
-from re import sub
 import numpy as np
 from sqlalchemy import null
 class Aes():
@@ -55,6 +51,7 @@ class Aes():
            [0x45,0xcf,0x4a,0xde,0x79,0x8b,0x86,0x91,0xa8,0xe3,0x3e,0x42,0xc6,0x51,0xf3,0x0e],
            [0x12,0x36,0x5a,0xee,0x29,0x7b,0x8d,0x8c,0x8f,0x8a,0x85,0x94,0xa7,0xf2,0x0d,0x17],
            [0x39,0x4b,0xdd,0x7c,0x84,0x97,0xa2,0xfd,0x1c,0x24,0x6c,0xb4,0xc7,0x52,0xf6,0x01]]
+        
         roundConstant = [0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80,0x1B,0x36]
 
         listaIndice  = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']
@@ -63,11 +60,11 @@ class Aes():
 
         chave = []
 
-        def __init__(self) -> None:
+        def __init__(self):
             self.chave = [0x41,0x42,0x43,0x44,
-         0x45,0x46,0x47,0x48,
-         0x49,0x4a,0x4b,0x4c,
-         0x4d,0x4e,0x4f,0x50]
+                          0x45,0x46,0x47,0x48,
+                          0x49,0x4a,0x4b,0x4c,
+                          0x4d,0x4e,0x4f,0x50]
         
         def expancaoDeChave(self):
                 self.roundKeys.append(self.chave)
@@ -195,6 +192,8 @@ class Aes():
                 #caso o y seja 1 retorna o x
                 elif(y == 1):
                         return x
+                elif(x == 1):
+                        return y
                 #caso o x não seja 0 e o y não e 1
                 else:
                         x = self.getTabelaL(x)
@@ -221,7 +220,6 @@ class Aes():
                 else:
                         return null
 
-
         def getTabelaE(self,valor):
                 #dado um valor, pega sua representação em hexa para pegar um valor na matriz tabelaE
                 #o primeiro char representa a linha e o segundo a coluna
@@ -237,6 +235,15 @@ class Aes():
                         return self.tabelaE[linha][coluna]
                 else:
                         return null
+
+        def lerArquivo(self,caminho):
+                arquivo = open(caminho,'r')
+                a = True
+                while a:
+                    file_line = arquivo.read(16)
+                    if not file_line:
+                        print("End Of File")
+                        a = False
 
 a = Aes()
 textoteste = [0x44,0x45,0x53,0x45,0x4e,0x56,0x4f,0x4c,0x56,0x49,0x4d,0x45,0x4e,0x54,0x4f,0x21]
