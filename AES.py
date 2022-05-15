@@ -4,8 +4,8 @@ from pickletools import bytes1
 from re import sub
 import numpy as np
 from sqlalchemy import null
-
-sBox = [[0x63,0x7c,0x77,0x7b,0xf2,0x6b,0x6f,0xc5,0x30,0x01,0x67,0x2b,0xfe,0xd7,0xab,0x76],
+class Aes():
+        sBox = [[0x63,0x7c,0x77,0x7b,0xf2,0x6b,0x6f,0xc5,0x30,0x01,0x67,0x2b,0xfe,0xd7,0xab,0x76],
         [0xca,0x82,0xc9,0x7d,0xfa,0x59,0x47,0xf0,0xad,0xd4,0xa2,0xaf,0x9c,0xa4,0x72,0xc0],
         [0xb7,0xfd,0x93,0x26,0x36,0x3f,0xf7,0xcc,0x34,0xa5,0xe5,0xf1,0x71,0xd8,0x31,0x15],
         [0x04,0xc7,0x23,0xc3,0x18,0x96,0x05,0x9a,0x07,0x12,0x80,0xe2,0xeb,0x27,0xb2,0x75],
@@ -22,7 +22,7 @@ sBox = [[0x63,0x7c,0x77,0x7b,0xf2,0x6b,0x6f,0xc5,0x30,0x01,0x67,0x2b,0xfe,0xd7,0
         [0xe1,0xf8,0x98,0x11,0x69,0xd9,0x8e,0x94,0x9b,0x1e,0x87,0xe9,0xce,0x55,0x28,0xdf],
         [0x8c,0xa1,0x89,0x0d,0xbf,0xe6,0x42,0x68,0x41,0x99,0x2d,0x0f,0xb0,0x54,0xbb,0x16]]
 
-tabelaL = [[0x00,0x00,0x19,0x01,0x32,0x02,0x1a,0xc6,0x4b,0xc7,0x1b,0x68,0x33,0xee,0xdf,0x03],
+        tabelaL = [[0x00,0x00,0x19,0x01,0x32,0x02,0x1a,0xc6,0x4b,0xc7,0x1b,0x68,0x33,0xee,0xdf,0x03],
            [0x64,0x04,0xe0,0x0e,0x34,0x8d,0x81,0xef,0x4c,0x71,0x08,0xc8,0xf8,0x69,0x1c,0xc1],
            [0x7d,0xc2,0x1d,0xb5,0xf9,0xb9,0x27,0x6a,0x4d,0xe4,0xa6,0x72,0x9a,0xc9,0x09,0x78],
            [0x65,0x2f,0x8a,0x05,0x21,0x0f,0xe1,0x24,0x12,0xf0,0x82,0x45,0x35,0x93,0xda,0x8e],
@@ -39,7 +39,7 @@ tabelaL = [[0x00,0x00,0x19,0x01,0x32,0x02,0x1a,0xc6,0x4b,0xc7,0x1b,0x68,0x33,0xe
            [0x44,0x11,0x92,0xd9,0x23,0x20,0x2e,0x89,0xb4,0x7c,0xb8,0x26,0x77,0x99,0xe3,0xa5],
            [0x67,0x4a,0xed,0xde,0xc5,0x31,0xfe,0x18,0x0d,0x63,0x8c,0x80,0xc0,0xf7,0x70,0x07]]
 
-tabelaE = [[0x01,0x03,0x05,0x0f,0x11,0x33,0x55,0xff,0x1a,0x2a,0x72,0x96,0xa1,0xf8,0x13,0x35],
+        tabelaE = [[0x01,0x03,0x05,0x0f,0x11,0x33,0x55,0xff,0x1a,0x2a,0x72,0x96,0xa1,0xf8,0x13,0x35],
            [0x5f,0xe1,0x38,0x48,0xd8,0x73,0x95,0xa4,0xf7,0x02,0x06,0x0a,0x1e,0x22,0x66,0xaa],
            [0xe5,0x34,0x5c,0xe4,0x37,0x59,0xeb,0x26,0x6a,0xbe,0xd9,0x70,0x90,0xab,0xe6,0x31],
            [0x53,0xf5,0x04,0x0c,0x14,0x3c,0x44,0xcc,0x4f,0xd1,0x68,0xb8,0xd3,0x6e,0xb2,0xcd],
@@ -55,196 +55,196 @@ tabelaE = [[0x01,0x03,0x05,0x0f,0x11,0x33,0x55,0xff,0x1a,0x2a,0x72,0x96,0xa1,0xf
            [0x45,0xcf,0x4a,0xde,0x79,0x8b,0x86,0x91,0xa8,0xe3,0x3e,0x42,0xc6,0x51,0xf3,0x0e],
            [0x12,0x36,0x5a,0xee,0x29,0x7b,0x8d,0x8c,0x8f,0x8a,0x85,0x94,0xa7,0xf2,0x0d,0x17],
            [0x39,0x4b,0xdd,0x7c,0x84,0x97,0xa2,0xfd,0x1c,0x24,0x6c,0xb4,0xc7,0x52,0xf6,0x01]]
-roundConstant = [0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80,0x1B,0x36]
+        roundConstant = [0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80,0x1B,0x36]
 
-listaIndice  = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']
+        listaIndice  = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']
 
-roundKeys = []
+        roundKeys = []
 
-chave = [0x41,0x42,0x43,0x44,
+        chave = []
+
+        def __init__(self) -> None:
+            self.chave = [0x41,0x42,0x43,0x44,
          0x45,0x46,0x47,0x48,
          0x49,0x4a,0x4b,0x4c,
          0x4d,0x4e,0x4f,0x50]
-
-def expancaoDeChave():
-        global chave
-        global roundKeys
-        roundKeys.append(chave)
-        print (roundKeys)
-        for j in range(0,10):
-                print(j)
-                #Cria a primeira palavra
-                copiaw = []
-                #1 - copia a ultima palavra da roundKey
-                for i in range(12,16):
-                        copiaw.append(roundKeys[j][i])
-                #2 - Rot Word
-                copiaw = np.roll(copiaw,-1)
-                #3 - SubWord
-                copiaw = subBytes(copiaw)
-                #4 - RoundConstant
-                roundC = [roundConstant[j],0x0,0x0,0x0]
-                #5 – XOR com a RoundConstant
-                copiaw[0] = copiaw[0]^roundC[0]
-                #6 – Obtenção da primeira palavra
-                for i in range(0,4): 
-                        copiaw[i] = roundKeys[j][i]^copiaw[i]
-                roundKeys.append(list(copiaw))
-                
-                #Cria a palavra 2
-                for i in range(0,4):
-                        roundKeys[j+1].append(roundKeys[j+1][i]^roundKeys[j][i+4])
-                #Cria a palavra 3
-                for i in range(4,8):
-                        roundKeys[j+1].append(roundKeys[j+1][i]^roundKeys[j][i+4])
-                #Cria a palavra 4
-                for i in range(8,12):
-                        roundKeys[j+1].append(roundKeys[j+1][i]^roundKeys[j][i+4])
-
-def criptografaBloco(bloco):
-        #recebe uma lista de 16 ints e faz o processo de cifragem
-        global roundKeys
-        bloco = addRoundKey(bloco,roundKeys[0])
-        for i in range(1,10):
-                #SubBytes
-                bloco = subBytes(bloco)
-                #ShiftRows
-                bloco = ShiftRows(bloco)
-                #MixColumns
-                bloco = MixColumns(bloco)
-                #AddRoundKey
-                bloco = addRoundKey(bloco,roundKeys[i])
-        bloco = subBytes(bloco)
-        bloco = ShiftRows(bloco)
-        bloco = addRoundKey(bloco,roundKeys[10])
-        return bloco
-                
-def subBytes(lista):
-        #recebe uma lista de ints(0 a 255)
-        #para cada int pega sua representação em hexa para substituir pelo valor da tabela SBox
-        global sBox
-        for i in range(0,len(lista)): 
-                #pega o representação do valor em hexa (0X--) e remove o 0X
-                texHex = str(hex(lista[i])[2:])
-                #separa os dois caracteres do texhex
-                esq,dir  = texHex[:1],texHex[1:]
-                #caso o texhex tenha so um caracter o dir ficaria vazio logo é preciso colocar o valor de esq no dir e o dir recebe 0
-                if(dir == ""):
-                        dir = esq
-                        esq = "0"
-                #pega o indice para a linha usando a esq
-                linha = listaIndice.index(esq)
-                #pega o indice para a coluna usando a dir 
-                coluna = listaIndice.index(dir)
-                #substitui o valor na lsita pelo valor encontrado no SBox
-                lista[i] = sBox[linha][coluna]
-        return lista
-
-def addRoundKey(lista1,lista2):
-        #recebe duas lista e faz XOR entre as duas lista
-        saida = []
-        if(len(lista1) == len(lista2)):
-                for i in range(0,len(lista1)):
-                        saida.append(lista1[i]^lista2[i])
-        return saida
-
-def ShiftRows(lista):
-        #move os dados da segunda linha um para a direita
-        #move os dados da terceira linha dois para a direita
-        #move os dados da quarta linha tres para a direita
-        saida = []
-        if(len(lista) == 16):
-                saida.append(lista[0])
-                saida.append(lista[5])
-                saida.append(lista[10])
-                saida.append(lista[15])
-                saida.append(lista[4])
-                saida.append(lista[9])
-                saida.append(lista[14])
-                saida.append(lista[3])
-                saida.append(lista[8])
-                saida.append(lista[13])
-                saida.append(lista[2])
-                saida.append(lista[7])
-                saida.append(lista[12])
-                saida.append(lista[1])
-                saida.append(lista[6])
-                saida.append(lista[11])
-        return saida
-
-def MixColumns(lista):
-        #faz o XOR entre as multiplicaçoes de Galois com os dados vindo da matriz de multiplicação
-        saida = []
-        for i in range(0,13,4):
-                saida.append((multiplicacaoGalois(lista[i],2))^(multiplicacaoGalois(lista[i+1],3))^(multiplicacaoGalois(lista[i+2],1))^(multiplicacaoGalois(lista[i+3],1)))
-                saida.append((multiplicacaoGalois(lista[i],1))^(multiplicacaoGalois(lista[i+1],2))^(multiplicacaoGalois(lista[i+2],3))^(multiplicacaoGalois(lista[i+3],1)))
-                saida.append((multiplicacaoGalois(lista[i],1))^(multiplicacaoGalois(lista[i+1],1))^(multiplicacaoGalois(lista[i+2],2))^(multiplicacaoGalois(lista[i+3],3)))
-                saida.append((multiplicacaoGalois(lista[i],3))^(multiplicacaoGalois(lista[i+1],1))^(multiplicacaoGalois(lista[i+2],1))^(multiplicacaoGalois(lista[i+3],2)))
-        return saida
-
-def imprimeHexa(lista):
-        #imprime os valores de uma lista em hexadecimal
-        for i in lista:
-                print(hex(i))
-
-def multiplicacaoGalois(x,y):
-        #recebe dois valores mas o y so pode assumir 3 valores (1;2;3)
-        #caso o x seja 0 retorna 0
-        if(x == 0):
-                return 0
-        #caso o y seja 1 retorna o x
-        elif(y == 1):
-                return x
-        #caso o x não seja 0 e o y não e 1
-        else:
-                x = getTabelaL(x)
-                y = getTabelaL(y)
-                soma = x+y
-                if (soma > 255):
-                        soma -= 255
-                soma = getTabelaE(soma)
-                return soma
         
-def getTabelaL(valor):
-        #dado um valor, pega sua representação em hexa para pegar um valor na matriz tabelaL
-        #o primeiro char representa a linha e o segundo a coluna
-        global tabelaL
-        if(valor <= 255):
-                texHex = str(hex(valor)[2:])
-                esq,dir  = texHex[:1],texHex[1:]
-                if(dir == ""):
-                        dir = esq
-                        esq = "0"
-                linha = listaIndice.index(esq)
-                coluna = listaIndice.index(dir)
-                return tabelaL[linha][coluna]
-        else:
-                return null
+        def expancaoDeChave(self):
+                self.roundKeys.append(self.chave)
+                print (self.roundKeys)
+                for j in range(0,10):
+                        print(j)
+                        #Cria a primeira palavra
+                        copiaw = []
+                        #1 - copia a ultima palavra da roundKey
+                        for i in range(12,16):
+                                copiaw.append(self.roundKeys[j][i])
+                        #2 - Rot Word
+                        copiaw = np.roll(copiaw,-1)
+                        #3 - SubWord
+                        copiaw = self.subBytes(copiaw)
+                        #4 - RoundConstant
+                        roundC = [self.roundConstant[j],0x0,0x0,0x0]
+                        #5 – XOR com a RoundConstant
+                        copiaw[0] = copiaw[0]^roundC[0]
+                        #6 – Obtenção da primeira palavra
+                        for i in range(0,4): 
+                                copiaw[i] = self.roundKeys[j][i]^copiaw[i]
+                        self.roundKeys.append(list(copiaw))
+
+                        #Cria a palavra 2
+                        for i in range(0,4):
+                                self.roundKeys[j+1].append(self.roundKeys[j+1][i]^self.roundKeys[j][i+4])
+                        #Cria a palavra 3
+                        for i in range(4,8):
+                                self.roundKeys[j+1].append(self.roundKeys[j+1][i]^self.roundKeys[j][i+4])
+                        #Cria a palavra 4
+                        for i in range(8,12):
+                                self.roundKeys[j+1].append(self.roundKeys[j+1][i]^self.roundKeys[j][i+4])
+
+        def criptografaBloco(self,bloco):
+                #recebe uma lista de 16 ints e faz o processo de cifragem
+                bloco = self.addRoundKey(bloco,self.roundKeys[0])
+                for i in range(1,10):
+                        #SubBytes
+                        bloco = self.subBytes(bloco)
+                        #ShiftRows
+                        bloco = self.ShiftRows(bloco)
+                        #MixColumns
+                        bloco = self.MixColumns(bloco)
+                        #AddRoundKey
+                        bloco = self.addRoundKey(bloco,self.roundKeys[i])
+                bloco = self.subBytes(bloco)
+                bloco = self.ShiftRows(bloco)
+                bloco = self.addRoundKey(bloco,self.roundKeys[10])
+                return bloco
+
+        def subBytes(self,lista):
+                #recebe uma lista de ints(0 a 255)
+                #para cada int pega sua representação em hexa para substituir pelo valor da tabela SBox
+                global sBox
+                for i in range(0,len(lista)): 
+                        #pega o representação do valor em hexa (0X--) e remove o 0X
+                        texHex = str(hex(lista[i])[2:])
+                        #separa os dois caracteres do texhex
+                        esq,dir  = texHex[:1],texHex[1:]
+                        #caso o texhex tenha so um caracter o dir ficaria vazio logo é preciso colocar o valor de esq no dir e o dir recebe 0
+                        if(dir == ""):
+                                dir = esq
+                                esq = "0"
+                        #pega o indice para a linha usando a esq
+                        linha = self.listaIndice.index(esq)
+                        #pega o indice para a coluna usando a dir 
+                        coluna = self.listaIndice.index(dir)
+                        #substitui o valor na lsita pelo valor encontrado no SBox
+                        lista[i] = self.sBox[linha][coluna]
+                return lista
+
+        def addRoundKey(self,lista1,lista2):
+                #recebe duas lista e faz XOR entre as duas lista
+                saida = []
+                if(len(lista1) == len(lista2)):
+                        for i in range(0,len(lista1)):
+                                saida.append(lista1[i]^lista2[i])
+                return saida
+
+        def ShiftRows(self,lista):
+                #move os dados da segunda linha um para a direita
+                #move os dados da terceira linha dois para a direita
+                #move os dados da quarta linha tres para a direita
+                saida = []
+                if(len(lista) == 16):
+                        saida.append(lista[0])
+                        saida.append(lista[5])
+                        saida.append(lista[10])
+                        saida.append(lista[15])
+                        saida.append(lista[4])
+                        saida.append(lista[9])
+                        saida.append(lista[14])
+                        saida.append(lista[3])
+                        saida.append(lista[8])
+                        saida.append(lista[13])
+                        saida.append(lista[2])
+                        saida.append(lista[7])
+                        saida.append(lista[12])
+                        saida.append(lista[1])
+                        saida.append(lista[6])
+                        saida.append(lista[11])
+                return saida
+
+        def MixColumns(self,lista):
+                #faz o XOR entre as multiplicaçoes de Galois com os dados vindo da matriz de multiplicação
+                saida = []
+                for i in range(0,13,4):
+                        saida.append((self.multiplicacaoGalois(lista[i],2))^(self.multiplicacaoGalois(lista[i+1],3))^(self.multiplicacaoGalois(lista[i+2],1))^(self.multiplicacaoGalois(lista[i+3],1)))
+                        saida.append((self.multiplicacaoGalois(lista[i],1))^(self.multiplicacaoGalois(lista[i+1],2))^(self.multiplicacaoGalois(lista[i+2],3))^(self.multiplicacaoGalois(lista[i+3],1)))
+                        saida.append((self.multiplicacaoGalois(lista[i],1))^(self.multiplicacaoGalois(lista[i+1],1))^(self.multiplicacaoGalois(lista[i+2],2))^(self.multiplicacaoGalois(lista[i+3],3)))
+                        saida.append((self.multiplicacaoGalois(lista[i],3))^(self.multiplicacaoGalois(lista[i+1],1))^(self.multiplicacaoGalois(lista[i+2],1))^(self.multiplicacaoGalois(lista[i+3],2)))
+                return saida
+
+        def imprimeHexa(self,lista):
+                #imprime os valores de uma lista em hexadecimal
+                for i in lista:
+                        print(hex(i))
+
+        def multiplicacaoGalois(self,x,y):
+                #recebe dois valores mas o y so pode assumir 3 valores (1;2;3)
+                #caso o x seja 0 retorna 0
+                if(x == 0):
+                        return 0
+                #caso o y seja 1 retorna o x
+                elif(y == 1):
+                        return x
+                #caso o x não seja 0 e o y não e 1
+                else:
+                        x = self.getTabelaL(x)
+                        y = self.getTabelaL(y)
+                        soma = x+y
+                        if (soma > 255):
+                                soma -= 255
+                        soma = self.getTabelaE(soma)
+                        return soma
+
+        def getTabelaL(self,valor):
+                #dado um valor, pega sua representação em hexa para pegar um valor na matriz tabelaL
+                #o primeiro char representa a linha e o segundo a coluna
+                global tabelaL
+                if(valor <= 255):
+                        texHex = str(hex(valor)[2:])
+                        esq,dir  = texHex[:1],texHex[1:]
+                        if(dir == ""):
+                                dir = esq
+                                esq = "0"
+                        linha = self.listaIndice.index(esq)
+                        coluna = self.listaIndice.index(dir)
+                        return self.tabelaL[linha][coluna]
+                else:
+                        return null
 
 
-def getTabelaE(valor):
-        #dado um valor, pega sua representação em hexa para pegar um valor na matriz tabelaE
-        #o primeiro char representa a linha e o segundo a coluna
-        global tabelaE
-        if(valor <= 255):
-                texHex = str(hex(valor)[2:])
-                esq,dir  = texHex[:1],texHex[1:]
-                if(dir == ""):
-                        dir = esq
-                        esq = "0"
-                linha = listaIndice.index(esq)
-                coluna = listaIndice.index(dir)
-                return tabelaE[linha][coluna]
-        else:
-                return null
+        def getTabelaE(self,valor):
+                #dado um valor, pega sua representação em hexa para pegar um valor na matriz tabelaE
+                #o primeiro char representa a linha e o segundo a coluna
+                global tabelaE
+                if(valor <= 255):
+                        texHex = str(hex(valor)[2:])
+                        esq,dir  = texHex[:1],texHex[1:]
+                        if(dir == ""):
+                                dir = esq
+                                esq = "0"
+                        linha = self.listaIndice.index(esq)
+                        coluna = self.listaIndice.index(dir)
+                        return self.tabelaE[linha][coluna]
+                else:
+                        return null
 
-
+a = Aes()
 textoteste = [0x44,0x45,0x53,0x45,0x4e,0x56,0x4f,0x4c,0x56,0x49,0x4d,0x45,0x4e,0x54,0x4f,0x21]
-expancaoDeChave()
-p1 = criptografaBloco(textoteste)
+a.expancaoDeChave()
+p1 = a.criptografaBloco(textoteste)
 print("----final----")
-imprimeHexa(p1)
+a.imprimeHexa(p1)
 #shtr = [0x6b,0xca,0x6f,0xa3,0x2b,0x7b,0x63,0x7c,0xc0,0xa2,0xca,0xf2,0x7b,0xc5,0x30,0x01]
 
-        
+
 
