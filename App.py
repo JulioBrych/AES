@@ -1,40 +1,48 @@
 
 from tkinter import *
 from tkinter.filedialog import *
-
+import os
 from path import Path
 from AES import *
-from tabe import ts
 caminho_do_arquivo_entrada = Path()
-caminho_do_arquivo_saida = Path()
+caminho_do_arquivo_saida = ""
+tipoEntrada = ""
 
 def criptografar():
-    cripto  = Aes()
-    teste = ts(caminho_do_arquivo_entrada)
+    global caminho_do_arquivo_entrada
+    global caminho_do_arquivo_saida
+    global janela
+    global tipoEntrada
+    pathSaida = str(caminho_do_arquivo_saida) + "/" + nome.get() + tipoEntrada
+    print(pathSaida)
+    cripto  = Aes(caminho_do_arquivo_entrada,pathSaida)
     #TODO pasas os dados da janela para o cripto quando ele estiver pronto para receber 
     
 
 def selecionarArquivoEntrada():
     global caminho_do_arquivo_entrada
     global janela
+    global tipoEntrada
     caminho_do_arquivo_entrada = Path(askopenfilename(
         title='Selecionar Arquivo',
         initialdir='/',
         filetypes = (("Arquivos de texto", "*.txt"),("Arquivos Binário", "*.bin"))))
+    aux = os.path.splitext(str(caminho_do_arquivo_entrada))
+    tipoEntrada = aux[len(aux)-1]
     box1.config(text=caminho_do_arquivo_entrada)
 
 def selecionarArquivoSaida():
     global caminho_do_arquivo_saida
     global janela
     caminho_do_arquivo_saida = ""
-    caminho_do_arquivo_saida = Path(askdirectory(
+    caminho_do_arquivo_saida = askdirectory(
         title='Selecionar Pasta',
-        initialdir='/'))
+        initialdir='/')
     box2.config(text=caminho_do_arquivo_saida)
     
 janela = Tk()
 janela.title("Criptador AES (Modo ECB)")
-janela.minsize(600,500)
+janela.minsize(515,250)
 
 label1 = Label(janela,text="Arquivo:")
 label1.place(x=20,y=20)

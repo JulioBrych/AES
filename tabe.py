@@ -1,15 +1,15 @@
+import base64
+from Crypto.Cipher import AES
+import binascii
 
-from pathlib import Path
-
-from pygame import init
-class ts():
-    def __init__(self,cam):
-        arquivo = open(cam,'r')
-        a = True
-        while a:
-            file_line = arquivo.read(16)
-            if not file_line:
-                print("End Of File")
-                a = False
-            else:
-                print(file_line)
+key = b'ABCDEFGHIJKLMNOP'
+ent = open(r"C:\temp\a.txt","rb")
+a = ent.read()
+des = ""
+for i in a:
+    des += (str(i))
+print(des)
+decipher = AES.new(key, AES.MODE_ECB)
+msg_dec = decipher.decrypt(a)
+print(msg_dec)
+#saida = cipher.decrypt(a)

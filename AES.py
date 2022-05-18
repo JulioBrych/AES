@@ -60,11 +60,19 @@ class Aes():
 
         chave = []
 
-        def __init__(self):
-            self.chave = [0x41,0x42,0x43,0x44,
-                          0x45,0x46,0x47,0x48,
-                          0x49,0x4a,0x4b,0x4c,
-                          0x4d,0x4e,0x4f,0x50]
+        def __init__(self,entrada,saida):
+                self.chave = [0x41,0x42,0x43,0x44,
+                                0x45,0x46,0x47,0x48,
+                                0x49,0x4a,0x4b,0x4c,
+                                0x4d,0x4e,0x4f,0x50]
+                self.pathEntrada = entrada
+                self.pathSaida = saida
+                blocosEntrada = self.lerArquivo()
+                print(blocosEntrada)
+                blocosEntrada = self.PKCS7(blocosEntrada)
+                print(blocosEntrada)
+                self.criptografar(blocosEntrada)
+
         
         def expancaoDeChave(self):
                 self.roundKeys.append(self.chave)
@@ -236,15 +244,41 @@ class Aes():
                 else:
                         return null
 
-        def lerArquivo(self,caminho):
-                arquivo = open(caminho,'r')
+        def lerArquivo(self,):
+                arquivo = open(self.pathEntrada,'rb')
                 a = True
+                li = []
                 while a:
-                    file_line = arquivo.read(16)
-                    if not file_line:
-                        print("End Of File")
-                        a = False
-
+                        file_line = arquivo.read(16)
+                        if not file_line:
+                                a = False
+                        else:    
+                                aux = []
+                                for i in range(0,len(file_line)):
+                                        aux.append(int(file_line[i])) 
+                                li.append(aux)
+                arquivo.close()
+                return li
+        
+        def PKCS7(self,lista):
+                tamlis = len(lista)-1
+                tamblo = len(lista[tamlis])
+                if(tamblo == 16):
+                        lista.append([16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16])
+                else:
+                        tamblo = 16 - tamblo
+                        for i in range(0,tamblo):
+                                lista[tamlis].append(tamblo)
+                return lista
+        
+        def criptografar(self,lista):
+                self.expancaoDeChave()
+                saida = open(self.pathSaida,"wb")
+                for i in lista:
+                        crip = self.criptografaBloco(i)
+                        for j in crip:
+                                saida.write(j.item().to_bytes(2, byteorder='big'))
+'''
 a = Aes()
 textoteste = [0x44,0x45,0x53,0x45,0x4e,0x56,0x4f,0x4c,0x56,0x49,0x4d,0x45,0x4e,0x54,0x4f,0x21]
 a.expancaoDeChave()
@@ -252,6 +286,6 @@ p1 = a.criptografaBloco(textoteste)
 print("----final----")
 a.imprimeHexa(p1)
 #shtr = [0x6b,0xca,0x6f,0xa3,0x2b,0x7b,0x63,0x7c,0xc0,0xa2,0xca,0xf2,0x7b,0xc5,0x30,0x01]
-
+'''
 
 
