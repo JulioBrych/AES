@@ -9,9 +9,8 @@ import re
 caminho_do_arquivo_entrada = Path()
 caminho_do_arquivo_saida = ""
 tipoEntrada = ""
-
+# Guilherme Fibrants e Julio Vicente Brych
 def criptografar():
-    #65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80
     global caminho_do_arquivo_entrada
     global caminho_do_arquivo_saida
     global janela
