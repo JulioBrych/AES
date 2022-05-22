@@ -2,23 +2,49 @@
 from tkinter import *
 from tkinter.filedialog import *
 import os
-from path import Path
+from pathlib import Path
 from AES import *
+from tkinter import messagebox
+import re
 caminho_do_arquivo_entrada = Path()
 caminho_do_arquivo_saida = ""
 tipoEntrada = ""
 
 def criptografar():
+    #65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80
     global caminho_do_arquivo_entrada
     global caminho_do_arquivo_saida
     global janela
     global tipoEntrada
+    chaveTeste = []
+    chaveValida = False
     pathSaida = str(caminho_do_arquivo_saida) + "/" + nome.get() + tipoEntrada
-    print(pathSaida)
-    cripto  = Aes(caminho_do_arquivo_entrada,pathSaida)
-    #TODO pasas os dados da janela para o cripto quando ele estiver pronto para receber 
-    
+    contemLetras = bool(re.search('[a-zA-Z]', chave.get()))
+    if(contemLetras != False or chave.get() == ""):
+       messagebox.showerror("Erro!","Chave nao pode conter letras ou ser vazia")
+    else:
+        chaveTeste = chave.get().split(',')
+        chaveTeste = list(map(int, chaveTeste))
 
+        if(len(chaveTeste) == 16):
+            chaveValida = True
+            for i in chaveTeste:
+                if(i>255):
+                    chaveValida = False
+                    break;
+            if chaveValida == False:
+                messagebox.showerror("Erro!","Valor do byte superior a 255")
+                
+        else:
+            messagebox.showerror("Erro!","Numero de bytes da chave invalidos")
+
+        if(chaveValida == True):
+            cripto  = Aes(caminho_do_arquivo_entrada,pathSaida,chaveTeste)
+            if cripto.startLeitura() == True:
+                 messagebox.showinfo("Sucesso!","Criptografado com êxito")
+            else:
+                messagebox.showerror("Erro!","Selecione um arquivo")
+    
 def selecionarArquivoEntrada():
     global caminho_do_arquivo_entrada
     global janela
